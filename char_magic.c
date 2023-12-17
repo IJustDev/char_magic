@@ -88,8 +88,22 @@ char_magic_string_view* char_magic_string_view_split(char_magic_string_view stri
 	return views;
 }
 
+void char_magic_string_builder_append_string_view(char_magic_string_builder* builder, char_magic_string_view string_view) {
+	for (int i = 0; i != string_view.length; i++) {
+		char c = string_view.string[i];
+		if (c == '\0') continue;
+		char_magic_string_builder_append(builder, c);
+	}
+}
+
 int main() {
-	char_magic_string_view args = char_magic_string_view_from_char_pointer("Hallo Welt, das ist ein Test");
+	char_magic_string_builder* builder = char_magic_string_builder_from_char_pointer("Hallo Welt,das ist ein Test");
+	char_magic_string_builder_append_string_view(
+		builder, char_magic_string_view_from_char_pointer(",Oder nicht?")
+	);
+	
+	char_magic_string_view view = char_magic_string_builder_build(builder);
+	char_magic_string_view args = char_magic_string_view_from_char_pointer(view.string);
 
 	char_magic_string_view* views = char_magic_string_view_split(args, ',');
 	char_magic_string_view current_view = views[0];
