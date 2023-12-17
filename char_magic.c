@@ -38,6 +38,7 @@ void char_magic_string_builder_append(char_magic_string_builder* builder, char c
 	builder->string[builder->length++] = c;
 }
 
+
 char_magic_string_builder* char_magic_string_builder_from_char_pointer(char* str) {
 	char_magic_string_builder* builder = char_magic_string_builder_init();
 	int index = 0;
@@ -60,47 +61,43 @@ char_magic_string_view char_magic_string_builder_build(char_magic_string_builder
 	return view;
 }
 
+char_magic_string_view char_magic_string_view_from_char_pointer(char* str) {
+	return char_magic_string_builder_build(char_magic_string_builder_from_char_pointer(str));
+}
 
 int char_magic_string_builder_concat(char_magic_string_view str1, char_magic_string_view str2) {
+	// TODO
 	return 0;
 }
 
-char_magic_string_builder** char_magic_string_view_split(char_magic_string_view string_view, char separator) {
-	char_magic_string_builder** builders = malloc(sizeof (char_magic_string_view*) * 10);
-	int builders_i = 0;
+char_magic_string_view* char_magic_string_view_split(char_magic_string_view string_view, char separator) {
+	char_magic_string_view* views = malloc(sizeof (char_magic_string_builder*) * 64); // TODO don't do this.
 	char_magic_string_builder* current_builder = char_magic_string_builder_init();
 
+	int views_index = 0;
 	for (int i = 0; i != string_view.length; i++) {
 		char c = string_view.string[i];
 		if (c == separator) {
-			builders[builders_i++] = current_builder;
+			views[views_index++] = char_magic_string_builder_build(current_builder);
 			current_builder = char_magic_string_builder_init();
 		} else {
 			char_magic_string_builder_append(current_builder, c);
 		}
 	}
-	builders[builders_i] = current_builder;
-	return builders;
+	views[views_index] = char_magic_string_builder_build(current_builder);
+	return views;
 }
 
 int main() {
-	char_magic_string_builder* builder = char_magic_string_builder_from_char_pointer("Das ist ein Test");
-	char_magic_string_builder_append(builder, 'C');
-	char_magic_string_builder_append(builder, 'C');
-	char_magic_string_builder_append(builder, 'H');
+	char_magic_string_view args = char_magic_string_view_from_char_pointer("Hallo Welt, das ist ein Test");
 
-	char_magic_string_view view = char_magic_string_builder_build(builder);
+	char_magic_string_view* views = char_magic_string_view_split(args, ',');
+	char_magic_string_view current_view = views[0];
 
-	char_magic_string_builder** builders = char_magic_string_view_split(view, ' ');
-
-	for (int i = 0; i != 10; i++) {
-		if (builders[i] == NULL) {
-			break;
-		}
-		char_magic_string_view v = char_magic_string_builder_build(builders[i]);
-		printf("Length: %d Value: %s\n", v.length, v.string);
-	}
-
-	printf("Length: %d; Value: %s", view.length, view.string);
+	int i = 1;
+	do {
+		printf("%s\n", current_view.string);
+		current_view = views[i++];
+	} while (current_view.string != NULL);
 }
 
